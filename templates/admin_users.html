@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Administrar Usuarios{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Administración de Usuarios</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Puntos</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone }}</td>
+                            <td>{{ user.points }}</td>
+                            <td>
+                                <span class="badge {% if user.active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ 'Activo' if user.active else 'Inactivo' }}
+                                </span>
+                            </td>
+                            <td>
+                                <button 
+                                    onclick="toggleUser({{ user.id }})"
+                                    class="btn btn-sm {% if user.active %}btn-warning{% else %}btn-success{% endif %}"
+                                >
+                                    {{ 'Desactivar' if user.active else 'Activar' }}
+                                </button>
+                                <button 
+                                    onclick="showRedeemModal({{ user.id }}, '{{ user.name }}', {{ user.points }})"
+                                    class="btn btn-sm btn-primary"
+                                    {% if not user.active %}disabled{% endif %}
+                                >
+                                    Canjear Puntos
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para canjear puntos -->
+<div class="modal fade" id="redeemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Canjear Puntos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Cliente: <span id="userName"></span></h6>
+                <p>Puntos disponibles: <span id="userPoints"></span></p>
+                <div class="rewards-list">
+                    <!-- Las recompensas se cargarán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleUser(userId) {
+    fetch(`/admin/toggle-user/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Error al cambiar el estado del usuario');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud');
+    });
+}
+
+function showRedeemModal(userId, userName, userPoints) {
+    document.getElementById('userName').textContent = userName;
+    document.getElementById('userPoints').textContent = userPoints;
+    
+    // Cargar recompensas disponibles
+    fetch('/admin/rewards')
+        .then(response => response.json())
+        .then(rewards => {
+            const rewardsList = document.querySelector('.rewards-list');
+            rewardsList.innerHTML = rewards.map(reward => `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h6 class="card-title">${reward.name}</h6>
+                        <p class="card-text">${reward.description}</p>
+                        <p>Puntos requeridos: ${reward.points_required}</p>
+                        <button 
+                            onclick="redeemReward(${userId}, ${reward.id})"
+                            class="btn btn-primary btn-sm"
+                            ${userPoints < reward.points_required ? 'disabled' : ''}
+                        >
+                            Canjear
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        });
+    
+    const modal = new bootstrap.Modal(document.getElementById('redeemModal'));
+    modal.show();
+}
+
+function redeemReward(userId, rewardId) {
+    if (confirm('¿Estás seguro de que deseas canjear esta recompensa?')) {
+        fetch(`/admin/redeem/${userId}/${rewardId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error al canjear la recompensa');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
+}
+</script>
+{% endblock %}

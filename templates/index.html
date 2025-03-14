@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4">¡Bienvenido a nuestro Sistema de Puntos!</h1>
+        <p class="lead">Gana puntos por tus compras y canjéalos por increíbles recompensas</p>
+        {% if not current_user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3">Registrarse</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">Iniciar Sesión</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card feature-card text-center">
+                <div class="card-body">
+                    <i class="bi bi-coin feature-icon"></i>
+                    <h3>Gana Puntos</h3>
+                    <p>Obtén 5% en puntos por cada $100 MXN en compras</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card text-center">
+                <div class="card-body">
+                    <i class="bi bi-gift feature-icon"></i>
+                    <h3>Canjea Recompensas</h3>
+                    <p>Usa tus puntos para obtener descuentos y productos exclusivos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card text-center">
+                <div class="card-body">
+                    <i class="bi bi-bell feature-icon"></i>
+                    <h3>Recibe Notificaciones</h3>
+                    <p>Mantente informado sobre ofertas especiales y nuevas recompensas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container mt-5">
+    <h2 class="text-center mb-4">¿Cómo Funciona?</h2>
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-primary rounded-circle p-3 me-3">1</div>
+                        <h5 class="mb-0">Regístrate en nuestra plataforma</h5>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-primary rounded-circle p-3 me-3">2</div>
+                        <h5 class="mb-0">Realiza tus compras normalmente</h5>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-primary rounded-circle p-3 me-3">3</div>
+                        <h5 class="mb-0">Acumula puntos automáticamente</h5>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="badge bg-primary rounded-circle p-3 me-3">4</div>
+                        <h5 class="mb-0">¡Canjea tus puntos por recompensas!</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

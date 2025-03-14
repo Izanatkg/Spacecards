@@ -1,0 +1,78 @@
+.hero-section {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 4rem 0;
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    border: none;
+    transition: transform 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: #007bff;
+    margin-bottom: 1rem;
+}
+
+.points-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.transaction-history {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.reward-card {
+    border: 1px solid #dee2e6;
+    transition: transform 0.2s ease;
+}
+
+.reward-card:hover {
+    transform: scale(1.02);
+}
+
+.admin-stats {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.notification-badge {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.dashboard-card {
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.progress-circle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+}

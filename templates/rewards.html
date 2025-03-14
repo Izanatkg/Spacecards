@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Recompensas Disponibles{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Recompensas Disponibles</h2>
+    <div class="row">
+        {% for reward in rewards %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if reward.image_url %}
+                <img src="{{ reward.image_url }}" class="card-img-top" alt="{{ reward.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light p-4 text-center">
+                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                    <p class="mt-2 mb-0">Sin imagen</p>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ reward.name }}</h5>
+                    <p class="card-text">{{ reward.description }}</p>
+                    <p class="card-text">
+                        <strong>Puntos requeridos:</strong> {{ reward.points_required or 0 }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Stock disponible:</strong> 
+                        {% if reward.stock and reward.stock > 0 %}
+                            <span class="text-success">{{ reward.stock }} unidades</span>
+                        {% else %}
+                            <span class="text-danger">Agotado</span>
+                        {% endif %}
+                    </p>
+                    <p class="card-text">
+                        <strong>Estado:</strong>
+                        {% if reward.available and reward.stock and reward.stock > 0 %}
+                            <span class="badge bg-success">Disponible</span>
+                        {% else %}
+                            <span class="badge bg-danger">No disponible</span>
+                        {% endif %}
+                    </p>
+                    {% if reward.points_required and current_user.points >= reward.points_required and reward.available and reward.stock and reward.stock > 0 %}
+                    <p class="text-success">
+                        <i class="bi bi-check-circle"></i> Tienes suficientes puntos
+                    </p>
+                    {% else %}
+                    <p class="text-muted">
+                        {% if not reward.stock or reward.stock == 0 %}
+                            <i class="bi bi-exclamation-circle"></i> Producto agotado
+                        {% else %}
+                            <i class="bi bi-info-circle"></i> Necesitas {{ (reward.points_required or 0) - current_user.points }} puntos más
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    <p class="text-info mt-2">
+                        <i class="bi bi-info-circle"></i> Contacta al administrador para canjear tus puntos
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

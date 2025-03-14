@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Resumen de Puntos -->
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body text-center">
+                    <h3>Mis Puntos</h3>
+                    <div class="points-display mb-3">
+                        <i class="bi bi-coin"></i> {{ current_user.points }}
+                    </div>
+                    <p class="text-muted">Equivalente a ${{ "%.2f"|format(current_user.points|float / 20) }} MXN</p>
+                    <a href="{{ url_for('rewards') }}" class="btn btn-primary">
+                        <i class="bi bi-gift"></i> Canjear Puntos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Próxima Meta -->
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body text-center">
+                    <h3>Próxima Meta</h3>
+                    <div class="progress-circle mb-3">
+                        <canvas id="progressChart"></canvas>
+                        <div class="progress-text"></div>
+                    </div>
+                    <p class="text-muted">500 puntos más para tu próxima recompensa</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body text-center">
+                    <h3>Estadísticas</h3>
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <h4>{{ total_transactions }}</h4>
+                            <p class="text-muted">Compras</p>
+                        </div>
+                        <div class="col-6">
+                            <h4>{{ total_rewards }}</h4>
+                            <p class="text-muted">Canjes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Transacciones -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h3>Historial de Transacciones</h3>
+                    <div class="table-responsive transaction-history">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Monto</th>
+                                    <th>Puntos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr>
+                                    <td>{{ transaction.date.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% if transaction.amount > 0 %}
+                                        <span class="badge bg-success">Compra</span>
+                                        {% else %}
+                                        <span class="badge bg-primary">Canje</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>${{ "%.2f"|format(transaction.amount|abs) }}</td>
+                                    <td>
+                                        {% if transaction.points_earned > 0 %}
+                                        <span class="text-success">+{{ transaction.points_earned }}</span>
+                                        {% else %}
+                                        <span class="text-primary">{{ transaction.points_earned }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recompensas Disponibles -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>Recompensas Disponibles</h3>
+        </div>
+        {% for reward in available_rewards %}
+        <div class="col-md-4">
+            <div class="card reward-card mb-4">
+                <div class="card-body">
+                    <h5>{{ reward.name }}</h5>
+                    <p class="text-muted">{{ reward.description }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-coin"></i> {{ reward.points_required }} puntos</span>
+                        <button class="btn btn-sm btn-primary" onclick="redeemReward({{ reward.id }})">
+                            Canjear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar el gráfico circular de progreso
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    const currentPoints = {{ current_user.points }};
+    const targetPoints = currentPoints + 500;
+    const progress = (currentPoints / targetPoints) * 100;
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [progress, 100 - progress],
+                backgroundColor: ['#007bff', '#e9ecef'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '80%',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+
+function redeemReward(rewardId) {
+    if (confirm('¿Estás seguro de que deseas canjear esta recompensa?')) {
+        fetch(`/redeem/${rewardId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al procesar tu solicitud.');
+        });
+    }
+}
+</script>
+{% endblock %}
